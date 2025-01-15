@@ -9,26 +9,13 @@ env:
   SYM: 2
 
 jobs:
-  ec2-start:
-    runs-on: ubuntu-latest
-
-    steps:
-      # Step 2: Set up AWS CLI
-      - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
-
-      # Step 3: Start EC2 instance
-      - name: Start EC2 instance
-        run: |
-          aws ec2 start-instances --instance-ids i-0133c8f6344ff0d86
+  AWS:
+    uses: ./.github/workflows/graviton.yml
+    secrets: inherit
 
   GEMM:
     runs-on: [ self-hosted, graviton ]
-    needs: ec2-start
+    needs: AWS
     steps:
       - uses: actions/checkout@v4
       - name: GEMM
@@ -36,7 +23,7 @@ jobs:
 
   BCSC_SPMM:
     runs-on: [ self-hosted, graviton ]
-    needs: ec2-start
+    needs: AWS
     steps:
       - uses: actions/checkout@v4
       - name: BCSC_SPMM
@@ -44,7 +31,7 @@ jobs:
 
   ELTWISE:
     runs-on: [ self-hosted, graviton ]
-    needs: ec2-start
+    needs: AWS
     steps:
       - uses: actions/checkout@v4
       - name: ELTWISE
@@ -52,7 +39,7 @@ jobs:
 
   EQUATION:
     runs-on: [ self-hosted, graviton ]
-    needs: ec2-start
+    needs: AWS
     steps:
       - uses: actions/checkout@v4
       - name: EQUATION
@@ -60,7 +47,7 @@ jobs:
 
   FSSPMDM:
     runs-on: [ self-hosted, graviton ]
-    needs: ec2-start
+    needs: AWS
     steps:
       - uses: actions/checkout@v4
       - name: FSSPMDM
@@ -70,7 +57,7 @@ jobs:
 
   Test_4:
     runs-on: [ self-hosted, graviton ]
-    needs: ec2-start
+    needs: AWS
     steps:
       - uses: actions/checkout@v4
       - name: TEST_4
@@ -78,7 +65,7 @@ jobs:
 
   Test_6:
     runs-on: [ self-hosted, graviton ]
-    needs: ec2-start
+    needs: AWS
     steps:
       - uses: actions/checkout@v4
       - name: TEST_6
@@ -86,7 +73,7 @@ jobs:
 
   Test_11:
     runs-on: [ self-hosted, graviton ]
-    needs: ec2-start
+    needs: AWS
     steps:
       - uses: actions/checkout@v4
       - name: TEST_11
@@ -94,7 +81,7 @@ jobs:
 
   Fortran:
     runs-on: [ self-hosted, graviton ]
-    needs: ec2-start
+    needs: AWS
     steps:
       - uses: actions/checkout@v4
       - name: FORTRAN
