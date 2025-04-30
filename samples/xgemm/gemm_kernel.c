@@ -9,6 +9,7 @@
 /* Alexander Heinecke, Evangelos Georganas (Intel Corp.)
 ******************************************************************************/
 #include <libxsmm_utils.h>
+#include <libxsmm_math.h>
 #include <libxsmm.h>
 #include <float.h>
 #if defined(__APPLE__) && defined(__arm64__)
@@ -2084,131 +2085,6 @@ void ref_fused_matmul( gemm_def* i_gemm_def_in, void* l_a, void* l_b, void* l_c_
   } else {
     ref_matmul( i_gemm_def, l_a, l_b, l_c_gold );
   }
-}
-
-LIBXSMM_INLINE
-double check_matrix( const libxsmm_datatype dtype, const void* data_gold, const void* data, const libxsmm_blasint ld, const libxsmm_blasint m, const libxsmm_blasint n ) {
-  libxsmm_matdiff_info l_diff;
-  double error = 0.0;
-
-  libxsmm_matdiff_clear(&l_diff);
-  if ( dtype == LIBXSMM_DATATYPE_F64 ) {
-    libxsmm_matdiff(&l_diff, LIBXSMM_DATATYPE_F64, m, n, data_gold, data, &ld, &ld);
-    error = l_diff.normf_rel;
-  } else if ( dtype == LIBXSMM_DATATYPE_F32 ) {
-#if 0
-    float* data_gold_f = (float*)data_gold;
-    float* data_f      = (float*)data;
-    libxsmm_blasint l_i, l_j;
-
-    for (l_i = 0; l_i < m; l_i++) {
-      for (l_j = 0; l_j < n; l_j++) {
-        printf("gold: %10.10f, computed: %10.10f, diff: %10.10f\n", data_gold_f[(l_j * ld) + l_i], data_f[(l_j * ld) + l_i], data_gold_f[(l_j * ld) + l_i]-data_f[(l_j * ld) + l_i] );
-      }
-    }
-#endif
-    libxsmm_matdiff(&l_diff, LIBXSMM_DATATYPE_F32, m, n, data_gold, data, &ld, &ld);
-    error = l_diff.normf_rel;
-  } else if ( dtype == LIBXSMM_DATATYPE_BF16 ) {
-    float* data_gold_f = (float*)malloc( sizeof(float) * ld * n );
-    float* data_f      = (float*)malloc( sizeof(float) * ld * n );
-#if 0
-    libxsmm_blasint l_i, l_j;
-#endif
-
-    libxsmm_convert_bf16_f32( (libxsmm_bfloat16*)data_gold, data_gold_f, ld*n );
-    libxsmm_convert_bf16_f32( (libxsmm_bfloat16*)data,      data_f,      ld*n );
-#if 0
-    for (l_i = 0; l_i < m; l_i++) {
-      for (l_j = 0; l_j < n; l_j++) {
-        printf("gold: %10.10f, computed: %10.10f, diff: %10.10f\n", data_gold_f[(l_j * ld) + l_i], data_f[(l_j * ld) + l_i], data_gold_f[(l_j * ld) + l_i]-data_f[(l_j * ld) + l_i] );
-      }
-      printf("\n");
-    }
-#endif
-    libxsmm_matdiff(&l_diff, LIBXSMM_DATATYPE_F32, m, n, data_gold_f, data_f, &ld, &ld);
-    error = l_diff.normf_rel;
-
-    free( data_f );
-    free( data_gold_f );
-  } else if ( dtype == LIBXSMM_DATATYPE_F16 ) {
-    float* data_gold_f = (float*)malloc( sizeof(float) * ld * n );
-    float* data_f      = (float*)malloc( sizeof(float) * ld * n );
-
-    libxsmm_convert_f16_f32( (libxsmm_float16*)data_gold, data_gold_f, ld*n );
-    libxsmm_convert_f16_f32( (libxsmm_float16*)data,      data_f,      ld*n );
-    libxsmm_matdiff(&l_diff, LIBXSMM_DATATYPE_F32, m, n, data_gold_f, data_f, &ld, &ld);
-    error = l_diff.normf_rel;
-
-    free( data_f );
-    free( data_gold_f );
-  } else if ( dtype == LIBXSMM_DATATYPE_BF8 ) {
-    float* data_gold_f = (float*)malloc( ld * n * sizeof(float) );
-    float* data_f      = (float*)malloc( ld * n * sizeof(float) );
-
-    libxsmm_convert_bf8_f32( (libxsmm_bfloat8*)data_gold, data_gold_f, ld*n );
-    libxsmm_convert_bf8_f32( (libxsmm_bfloat8*)data,      data_f,      ld*n );
-    libxsmm_matdiff(&l_diff, LIBXSMM_DATATYPE_F32, m, n, data_gold_f, data_f, &ld, &ld);
-    error = l_diff.normf_rel;
-
-    free( data_f );
-    free( data_gold_f );
-  } else if ( dtype == LIBXSMM_DATATYPE_HF8 ) {
-    float* data_gold_f = (float*)malloc( ld * n * sizeof(float) );
-    float* data_f      = (float*)malloc( ld * n * sizeof(float) );
-
-    libxsmm_convert_hf8_f32( (libxsmm_hfloat8*)data_gold, data_gold_f, ld*n );
-    libxsmm_convert_hf8_f32( (libxsmm_hfloat8*)data,      data_f,      ld*n );
-    libxsmm_matdiff(&l_diff, LIBXSMM_DATATYPE_F32, m, n, data_gold_f, data_f, &ld, &ld);
-    error = l_diff.normf_rel;
-
-#if 0
-    libxsmm_blasint l_i, l_j;
-    for (l_i = 0; l_i < m; l_i++) {
-      for (l_j = 0; l_j < n; l_j++) {
-        printf("gold: %f, computed: %f\n", data_gold_f[(l_j * ld) + l_i], data_f[(l_j * ld) + l_i] );
-      }
-    }
-#endif
-
-    free( data_f );
-    free( data_gold_f );
-  } else if ( dtype == LIBXSMM_DATATYPE_I32 ) {
-#if 0
-    int* data_gold_f = (int*)data_gold;
-    int* data_f      = (int*)data;
-    libxsmm_blasint l_i, l_j;
-
-    for (l_i = 0; l_i < m; l_i++) {
-      for (l_j = 0; l_j < n; l_j++) {
-        printf("gold: %i, computed: %i, diff: %i\n", data_gold_f[(l_j * ld) + l_i], data_f[(l_j * ld) + l_i], data_gold_f[(l_j * ld) + l_i]-data_f[(l_j * ld) + l_i] );
-      }
-    }
-#endif
-    libxsmm_matdiff(&l_diff, LIBXSMM_DATATYPE_I32, m, n, data_gold, data, &ld, &ld);
-    error = l_diff.normf_rel;
-  } else if ( dtype == LIBXSMM_DATATYPE_I8 ) {
-    libxsmm_matdiff(&l_diff, LIBXSMM_DATATYPE_I8, m, n, data_gold, data, &ld, &ld);
-    error = l_diff.normf_rel;
-  } else {
-    error = 100.0;
-  }
-
-  printf("\nPrinting Norms:\n");
-  printf("L1 reference  : %.25g\n", l_diff.l1_ref);
-  printf("L1 test       : %.25g\n", l_diff.l1_tst);
-  printf("L2 abs.error  : %.24f\n", l_diff.l2_abs);
-  printf("L2 rel.error  : %.24f\n", l_diff.l2_rel);
-  printf("Linf abs.error: %.24f\n", l_diff.linf_abs);
-  printf("Linf rel.error: %.24f\n", l_diff.linf_rel);
-  printf("Check-norm    : %.24f\n\n", error);
-
-  /* attempt to catch some corner/degenerated cases */
-  if (error > 0.6 && l_diff.linf_abs < 0.004) {
-    error = l_diff.linf_abs;
-  }
-
-  return error;
 }
 
 LIBXSMM_INLINE

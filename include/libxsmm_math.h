@@ -262,4 +262,11 @@ LIBXSMM_API double libxsmm_dsqrt(double x);
 /** SQRT with Newton's method using single-precision. */
 LIBXSMM_API float libxsmm_ssqrt(float x);
 
+/**
+ * Matrix norm checking functions.
+ */
+LIBXSMM_API
+double check_matrix( const libxsmm_datatype dtype, const void* data_gold, const void* data, const libxsmm_blasint ld, const libxsmm_blasint m, const libxsmm_blasint n );
+
+
 #endif /*LIBXSMM_MATH_H*/

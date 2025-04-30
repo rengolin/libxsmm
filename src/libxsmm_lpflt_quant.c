@@ -249,54 +249,11 @@ LIBXSMM_API void libxsmm_rne_convert_fp32_bf16(const float* in, libxsmm_bfloat16
   }
 }
 
-LIBXSMM_API void libxsmm_convert_bf16_f32(const libxsmm_bfloat16* in, float* out, size_t length) {
-  size_t i = 0;
-  for ( i = 0; i < length; ++i ) {
-    out[i] = libxsmm_convert_bf16_to_f32( in[i] );
-  }
-}
-
 LIBXSMM_API void libxsmm_rne_convert_fp32_f16(const float* in, libxsmm_float16* out, size_t length) {
   size_t i = 0;
   /* truncate buffer to bf16 */
   for ( i = 0; i < length; ++i ) {
     out[i] = libxsmm_convert_f32_to_f16( in[i] );
-  }
-}
-
-LIBXSMM_API void libxsmm_convert_f16_f32(const libxsmm_float16* in, float* out, size_t length) {
-  size_t i = 0;
-  for ( i = 0; i < length; ++i ) {
-    out[i] = libxsmm_convert_f16_to_f32( in[i] );
-  }
-}
-
-LIBXSMM_API void libxsmm_convert_hf8_f32(const libxsmm_hfloat8* in, float* out, size_t length) {
-  size_t i = 0;
-  for ( i = 0; i < length; ++i ) {
-    out[i] = libxsmm_convert_hf8_to_f32( in[i] );
-  }
-}
-
-LIBXSMM_API void libxsmm_rne_convert_fp32_hf8(const float* in, libxsmm_hfloat8* out, size_t length) {
-  size_t i = 0;
-  for ( i = 0; i < length; ++i ) {
-    out[i] = libxsmm_convert_f32_to_hf8_rne(in[i]);
-  }
-}
-
-LIBXSMM_API void libxsmm_rne_convert_fp32_bf8(const float* in, libxsmm_bfloat8* out, size_t length) {
-  size_t i = 0;
-  /* truncate buffer to bf8 */
-  for ( i = 0; i < length; ++i ) {
-    out[i] = libxsmm_convert_f32_to_bf8_rne( in[i] );
-  }
-}
-
-LIBXSMM_API void libxsmm_convert_bf8_f32(const libxsmm_bfloat8* in, float* out, size_t length) {
-  size_t i = 0;
-  for ( i = 0; i < length; ++i ) {
-    out[i] = libxsmm_convert_bf8_to_f32(in[i]);
   }
 }
 
